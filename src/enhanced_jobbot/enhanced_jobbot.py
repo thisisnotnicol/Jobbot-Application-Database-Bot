@@ -117,14 +117,18 @@ def extract_fields(job_text):
     prompt = f"""
 Extract the following fields from this job posting:
 
-- Position
-- Company
-- Salary
-- Commitment (Full time, Part time, Freelance, 10 hrs/wk)
-- Industry (list all that apply)
-- Location (city names or 'Remote')
+- Position: Job title
+- Company: Company name
+- Salary: Full salary range or amount (e.g., "$80,000 - $120,000", "$50/hour", "Competitive", or leave empty if not mentioned)
+- Commitment: Employment type (Full time, Part time, Contract, Freelance, Internship)
+- Industry: All relevant industries (e.g., ["Technology", "Healthcare", "Finance"])
+- Location: All locations mentioned, use "Remote" if remote work is mentioned (e.g., ["New York", "Remote"], ["San Francisco", "Los Angeles"])
 
-IMPORTANT: Respond with ONLY valid JSON, no markdown code blocks, no explanations, no backticks.
+IMPORTANT:
+- Respond with ONLY valid JSON, no markdown code blocks, no explanations, no backticks
+- For Salary: Include the full range if provided, don't abbreviate (e.g. "$80,000-$120,000 per year")
+- For Location: Always use an array, even for single locations
+- If information is not found, use empty string for strings or empty array for arrays
 
 Output JSON exactly like this format:
 
@@ -147,25 +151,33 @@ Job posting:
             messages=[{"role": "user", "content": prompt}],
         )
         text_output = response.choices[0].message.content
-        if text_output is None:
-            logging.error("OpenAI returned empty response")
-            return {"Full Description": job_text}
+        if text_output is None or text_output.strip() == "":
+            logging.error("OpenAI returned empty or None response")
+            fallback_fields = {"Full Description": job_text, "Summary": generate_job_summary(job_text)}
+            return fallback_fields
 
         text_output = text_output.strip()
 
         # Handle markdown-wrapped JSON responses
-        if text_output.startswith("```json"):
-            # Remove ```json and ``` wrapper
-            text_output = text_output[7:]  # Remove ```json
-            if text_output.endswith("```"):
-                text_output = text_output[:-3]  # Remove closing ```
-            text_output = text_output.strip()
-        elif text_output.startswith("```"):
+        if "```json" in text_output:
+            # Find and extract JSON content between ```json and ```
+            start_idx = text_output.find("```json") + 7
+            end_idx = text_output.find("```", start_idx)
+            if end_idx != -1:
+                text_output = text_output[start_idx:end_idx].strip()
+        elif "```" in text_output:
             # Handle plain ``` wrapper
-            lines = text_output.split('\n')
-            if len(lines) > 2:
-                text_output = '\n'.join(lines[1:-1])  # Remove first and last line
-            text_output = text_output.strip()
+            parts = text_output.split("```")
+            if len(parts) >= 3:
+                text_output = parts[1].strip()
+
+        # Remove any remaining newlines at start/end
+        text_output = text_output.strip()
+
+        if not text_output:
+            logging.error("Empty text after cleaning OpenAI response")
+            fallback_fields = {"Full Description": job_text, "Summary": generate_job_summary(job_text)}
+            return fallback_fields
 
         logging.info(f"Cleaned JSON response: {text_output[:200]}...")
         fields = json.loads(text_output)
@@ -192,7 +204,8 @@ Job posting:
         return fields
     except json.JSONDecodeError as e:
         logging.error(f"Failed to parse JSON from OpenAI response: {e}")
-        logging.error(f"Raw OpenAI response: {text_output}")
+        logging.error(f"Full raw response that failed to parse: '{text_output}'")
+        logging.error(f"Original response before cleaning: '{response.choices[0].message.content}'")
         fallback_fields = {"Full Description": job_text, "Summary": generate_job_summary(job_text)}
         # Clean location field in fallback too
         if "Location" in fallback_fields and isinstance(fallback_fields["Location"], list):
@@ -246,11 +259,69 @@ def split_text_for_notion(text, max_chars=1990):
 
     return chunks
 
+def find_or_create_company(company_name):
+    """Find existing company or create new one in the linked database"""
+    if not company_name or company_name.strip() == "":
+        return None
+
+    try:
+        # First, we need to get the Company property to find the linked database ID
+        database_info = notion.databases.retrieve(database_id=NOTION_DATABASE_ID)
+        company_prop = database_info.get('properties', {}).get('Company', {})
+
+        if company_prop.get('type') != 'relation':
+            logging.warning("Company field is not a relation field")
+            return None
+
+        company_database_id = company_prop.get('relation', {}).get('database_id')
+        if not company_database_id:
+            logging.warning("Could not find Company database ID")
+            return None
+
+        # Search for existing company
+        search_results = notion.databases.query(
+            database_id=company_database_id,
+            filter={
+                "property": "Name",  # Assuming the company name field is called "Name"
+                "title": {
+                    "equals": company_name.strip()
+                }
+            }
+        )
+
+        # If company exists, return its ID
+        if search_results.get("results"):
+            company_id = search_results["results"][0]["id"]
+            logging.info(f"Found existing company: {company_name} (ID: {company_id})")
+            return company_id
+
+        # If company doesn't exist, create it
+        new_company = notion.pages.create(
+            parent={"database_id": company_database_id},
+            properties={
+                "Name": {"title": [{"text": {"content": company_name.strip()}}]}
+            }
+        )
+
+        company_id = new_company["id"]
+        logging.info(f"Created new company: {company_name} (ID: {company_id})")
+        return company_id
+
+    except Exception as e:
+        logging.error(f"Error handling company '{company_name}': {e}")
+        return None
+
 def check_available_fields():
     """Check what fields are available in the current Notion database"""
     try:
         database_info = notion.databases.retrieve(database_id=NOTION_DATABASE_ID)
         properties = database_info.get('properties', {})
+
+        # Log all available properties for debugging
+        logging.info("Available Notion database fields:")
+        for prop_name, prop_info in properties.items():
+            prop_type = prop_info.get('type', 'unknown')
+            logging.info(f"  - {prop_name} ({prop_type})")
 
         available_fields = {
             'job_summary': 'Job Summary' in properties,
@@ -259,6 +330,18 @@ def check_available_fields():
             'job_desc_part_4': 'Job Description Part 4' in properties,
             'job_desc_part_5': 'Job Description Part 5' in properties
         }
+
+        # Check for required fields
+        required_fields = ['Position', 'Company', 'Salary', 'Location', 'Industry', 'Commitment', 'Status', 'Job URL', 'Processed']
+        missing_fields = []
+        for field in required_fields:
+            if field not in properties:
+                missing_fields.append(field)
+
+        if missing_fields:
+            logging.warning(f"Missing required database fields: {missing_fields}")
+        else:
+            logging.info("All required database fields are present")
 
         return available_fields
     except Exception as e:
@@ -283,7 +366,7 @@ def create_enhanced_job_description(summary, full_description, available_fields)
         combined = f"📋 SUMMARY:\n{summary}\n{separator}{full_description}"
         return combined
 
-def add_to_notion(fields, job_url):
+def add_to_notion(fields, job_url, page_id):
     try:
         # Check what fields are available
         available_fields = check_available_fields()
@@ -302,6 +385,35 @@ def add_to_notion(fields, job_url):
         commitment = fields.get("Commitment", "Full time")
         commitment_list = [commitment] if commitment else ["Full time"]
 
+        # Validate and clean multi-select fields
+        def clean_multiselect_values(values, field_name):
+            """Clean and validate multi-select values for Notion"""
+            if not values:
+                return []
+
+            if isinstance(values, str):
+                values = [values]
+
+            cleaned = []
+            for value in values:
+                if value and isinstance(value, str):
+                    # Remove special characters that might cause issues
+                    clean_value = str(value).strip()[:100]  # Limit length
+                    if clean_value:
+                        cleaned.append(clean_value)
+
+            logging.info(f"{field_name} values: {cleaned}")
+            return cleaned
+
+        # Clean the multi-select fields
+        industry_values = clean_multiselect_values(fields.get("Industry", []), "Industry")
+        location_values = clean_multiselect_values(fields.get("Location", []), "Location")
+        commitment_values = clean_multiselect_values(commitment_list, "Commitment")
+
+        # Handle company relation
+        company_name = fields.get("Company", "")
+        company_id = find_or_create_company(company_name) if company_name else None
+
         # Base properties that every job entry will have
         properties = {
             "Position": {"title": [{"text": {"content": fields.get("Position", "Unknown")}}]},
@@ -309,11 +421,15 @@ def add_to_notion(fields, job_url):
             "Active v Archived": {"status": {"name": "In progress"}},
             "Job URL": {"url": job_url},
             "Salary": {"rich_text": [{"text": {"content": fields.get("Salary", "")}}]},
-            "Commitment": {"multi_select": [{"name": c} for c in commitment_list]},
-            "Industry": {"multi_select": [{"name": i} for i in fields.get("Industry", [])]},
-            "Location": {"multi_select": [{"name": l} for l in fields.get("Location", [])]},
+            "Commitment": {"multi_select": [{"name": c} for c in commitment_values]},
+            "Industry": {"multi_select": [{"name": i} for i in industry_values]},
+            "Location": {"multi_select": [{"name": l} for l in location_values]},
             "Processed": {"checkbox": True},
         }
+
+        # Add company relation if we have a company ID
+        if company_id:
+            properties["Company"] = {"relation": [{"id": company_id}]}
 
         # Add job summary if separate field exists
         if available_fields['job_summary'] and summary:
@@ -359,8 +475,11 @@ def add_to_notion(fields, job_url):
                         properties[last_field_name] = {"rich_text": [{"text": {"content": combined_content}}]}
                     break
 
-        notion.pages.create(
-            parent={"database_id": NOTION_DATABASE_ID},
+        # Log what we're about to update
+        logging.info(f"Updating page {page_id} with properties: {list(properties.keys())}")
+
+        notion.pages.update(
+            page_id=page_id,
             properties=properties
         )
 
@@ -368,7 +487,12 @@ def add_to_notion(fields, job_url):
         parts_used = min(len(description_chunks), len([f for f, available in field_mapping if available]))
         total_chars = len(full_description)
 
-        logging.info(f"Job added to Notion: {fields.get('Position', 'Unknown')}")
+        logging.info(f"Job updated in Notion: {fields.get('Position', 'Unknown')}")
+        logging.info(f"Company: {fields.get('Company', 'Not found')} {'(linked)' if company_id else '(not linked)'}")
+        logging.info(f"Salary: {fields.get('Salary', 'Not found')}")
+        logging.info(f"Location: {fields.get('Location', 'Not found')}")
+        logging.info(f"Commitment: {fields.get('Commitment', 'Not found')}")
+        logging.info(f"Industry: {fields.get('Industry', 'Not found')}")
         logging.info(f"Summary generated: {'✓' if summary else '✗'}")
         logging.info(f"Description split into {parts_used} part(s)")
         logging.info(f"Total characters preserved: {total_chars}")
@@ -381,7 +505,19 @@ def add_to_notion(fields, job_url):
             logging.info(f"💡 Add {missing_desc_fields} more 'Job Description Part X' field(s) for full text preservation")
 
     except Exception as e:
-        logging.error(f"Error adding job to Notion: {e}")
+        logging.error(f"Error updating job in Notion: {e}")
+        logging.error(f"Fields that were being processed: {fields}")
+        logging.error(f"Page ID: {page_id}")
+        logging.error(f"Properties that failed: {list(properties.keys()) if 'properties' in locals() else 'properties not created'}")
+        # Try to mark as processed anyway to avoid infinite loops
+        try:
+            notion.pages.update(
+                page_id=page_id,
+                properties={"Processed": {"checkbox": True}}
+            )
+            logging.info("Marked page as processed despite error")
+        except Exception as inner_e:
+            logging.error(f"Failed to mark page as processed: {inner_e}")
 
 # -----------------------------
 # Main loop
@@ -421,7 +557,10 @@ def main():
                 filter={"property": "Processed", "checkbox": {"equals": False}}
             )
 
-            for page in query_results.get("results", []):
+            unprocessed_pages = query_results.get("results", [])
+            logging.info(f"Found {len(unprocessed_pages)} unprocessed pages")
+
+            for page in unprocessed_pages:
                 job_url_prop = page["properties"].get("Job URL", {})
                 job_url = job_url_prop.get("url")
                 if not job_url:
@@ -436,13 +575,7 @@ def main():
 
                 logging.info(f"Job text length: {len(job_text)} characters")
                 fields_dict = extract_fields(job_text)
-                add_to_notion(fields_dict, job_url)
-
-                # Mark original page as processed
-                notion.pages.update(
-                    page_id=page["id"],
-                    properties={"Processed": {"checkbox": True}}
-                )
+                add_to_notion(fields_dict, job_url, page["id"])
 
             logging.info("Cycle complete. Waiting 5 minutes before next check...")
             time.sleep(300)
