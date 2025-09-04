@@ -16,8 +16,13 @@ import re
 from dotenv import load_dotenv
 import requests
 from bs4 import BeautifulSoup
-import openai
 from notion_client import Client as NotionClient
+import openai
+from openai import OpenAI
+try:
+    from .job_formatter import format_job_description
+except ImportError:
+    from job_formatter import format_job_description
 
 # Playwright imports
 try:
@@ -187,12 +192,24 @@ Job posting:
 {job_text[:8000]}
 """
 
+    text_output = ""
     try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": prompt}],
-        )
-        text_output = response.choices[0].message.content
+        if client:
+            # Use new OpenAI client
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": prompt}],
+            )
+            text_output = response.choices[0].message.content
+        else:
+            # Fallback to old OpenAI API
+            response = openai.ChatCompletion.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": prompt}],
+                max_tokens=500,
+                temperature=0.2
+            )
+            text_output = response.choices[0].message.content
 
         if text_output is None or text_output.strip() == "":
             logging.error("OpenAI returned empty or None response")
@@ -255,6 +272,16 @@ Job posting:
             fields["HTML_SOUP"] = None
             text_for_summary = job_text
         fields["Summary"] = generate_job_summary(text_for_summary)
+
+        # Apply enhanced formatting
+        formatted_result = format_job_description(
+            content=fields["Full Description"],
+            soup=fields.get("HTML_SOUP"),
+            summary=fields.get("Summary")
+        )
+        fields["formatted_description"] = formatted_result['rich_text']
+        fields["notion_blocks"] = formatted_result['blocks']
+        fields["key_bullets"] = formatted_result['bullets']
 
         # Clean location field to avoid commas in multi-select options
         if "Location" in fields and isinstance(fields["Location"], list):
@@ -503,12 +530,12 @@ def check_available_fields():
 
 def create_enhanced_job_description(summary, full_description, available_fields):
     """Create enhanced description based on available fields"""
-    if available_fields['job_summary']:
-        return full_description
-    else:
-        separator = "\n" + "="*50 + "\n"
-        combined = f"📋 SUMMARY:\n{summary}\n{separator}{full_description}"
-        return combined
+    # Use the new formatter for better bullet handling
+    formatted = format_job_description(
+        content=full_description,
+        summary=summary if not available_fields['job_summary'] else None
+    )
+    return formatted['rich_text']
 
 def create_notion_page(fields, job_url):
     """Create a new Notion page with extracted job information"""
@@ -518,7 +545,12 @@ def create_notion_page(fields, job_url):
         full_description = fields.get("Full Description", "")
         summary = fields.get("Summary", "")
 
-        enhanced_description = create_enhanced_job_description(summary, full_description, available_fields)
+        # Use pre-formatted description if available, otherwise create one
+        formatted_description = fields.get("formatted_description")
+        if formatted_description:
+            enhanced_description = formatted_description
+        else:
+            enhanced_description = create_enhanced_job_description(summary, full_description, available_fields)
         description_chunks = split_text_for_notion(enhanced_description)
 
         # Handle commitment field

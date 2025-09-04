@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.jobbot.keeper</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/nicoleeid/jobbot_clean/venv/bin/python3</string>
+        <string>/Users/nicoleeid/jobbot_clean/keep_bot_running.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/nicoleeid/jobbot_clean</string>
+
+    <key>StandardOutPath</key>
+    <string>/Users/nicoleeid/jobbot_clean/keeper_output.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/nicoleeid/jobbot_clean/keeper_error.log</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <dict>
+        <key>SuccessfulExit</key>
+        <false/>
+        <key>Crashed</key>
+        <true/>
+        <key>PathState</key>
+        <dict>
+            <key>/Users/nicoleeid/jobbot_clean/bot_keeper.pid</key>
+            <false/>
+        </dict>
+    </dict>
+
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+
+    <key>StartInterval</key>
+    <integer>60</integer>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin</string>
+        <key>HOME</key>
+        <string>/Users/nicoleeid</string>
+        <key>PYTHONPATH</key>
+        <string>/Users/nicoleeid/jobbot_clean:/Users/nicoleeid/jobbot_clean/src</string>
+    </dict>
+
+    <key>ProcessType</key>
+    <string>Background</string>
+
+    <key>LowPriorityIO</key>
+    <false/>
+
+    <key>Nice</key>
+    <integer>0</integer>
+</dict>
+</plist>
