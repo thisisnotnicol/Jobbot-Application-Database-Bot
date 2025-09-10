@@ -63,9 +63,92 @@ notion = NotionClient(auth=NOTION_TOKEN)
 # Helper functions (reused from enhanced_jobbot.py)
 # -----------------------------
 
+def should_convert_to_greenhouse_embed(url):
+    """Check if URL is an embedded Greenhouse widget that should be converted to direct URL"""
+    import re
+    from urllib.parse import urlparse, parse_qs
+
+    # Pattern 1: Company career pages with gh_jid parameter
+    if 'gh_jid=' in url and not 'greenhouse.io' in url:
+        return True
+
+    # Pattern 2: Company career pages with greenhouse_jid parameter
+    if 'greenhouse_jid=' in url and not 'greenhouse.io' in url:
+        return True
+
+    # Pattern 3: URLs with job_id that might be Greenhouse (common patterns)
+    if ('job_id=' in url or 'jobId=' in url) and any(domain in url for domain in ['.com/careers', '/jobs', '/job-openings']):
+        return True
+
+    # Pattern 4: Already a greenhouse embed URL
+    if 'boards.greenhouse.io/embed' in url:
+        return False  # Already in correct format
+
+    return False
+
+def convert_to_greenhouse_embed(url):
+    """Convert embedded widget URLs to direct Greenhouse embed URLs"""
+    from urllib.parse import urlparse, parse_qs
+
+    parsed = urlparse(url)
+    query_params = parse_qs(parsed.query)
+
+    # Extract Greenhouse job ID from various parameter names
+    gh_jid = None
+    job_id_params = ['gh_jid', 'greenhouse_jid', 'job_id', 'jobId', 'id']
+
+    for param in job_id_params:
+        if param in query_params:
+            gh_jid = query_params[param][0]
+            break
+
+    if not gh_jid:
+        return None
+
+    # Determine company from domain with expanded mapping
+    domain = parsed.netloc.lower()
+    company_mapping = {
+        'forcefactor.com': 'forcefactor',
+        'notion.so': 'notion',
+        'figma.com': 'figma',
+        'stripe.com': 'stripe',
+        'shopify.com': 'shopify',
+        'airbnb.com': 'airbnb',
+        'uber.com': 'uber',
+        'lyft.com': 'lyft',
+        'doordash.com': 'doordash',
+        # Add more company mappings as needed
+    }
+
+    company = None
+    for domain_key, company_name in company_mapping.items():
+        if domain_key in domain:
+            company = company_name
+            break
+
+    if not company:
+        # Try to extract from domain (e.g., companyname.com -> companyname)
+        domain_parts = domain.split('.')
+        if len(domain_parts) >= 2:
+            company = domain_parts[-2]  # Get the part before .com/.org/.io etc
+        else:
+            company = domain_parts[0]
+
+    # Construct the direct Greenhouse embed URL
+    greenhouse_url = f"https://boards.greenhouse.io/embed/job_app?for={company}&token={gh_jid}"
+
+    return greenhouse_url
+
 def fetch_job_text_playwright(url):
     """Fetch job text using Playwright for dynamic sites"""
     try:
+        # Check for embedded Greenhouse widgets and convert to direct URLs
+        if should_convert_to_greenhouse_embed(url):
+            converted_url = convert_to_greenhouse_embed(url)
+            if converted_url:
+                logging.info(f"Converting embedded widget URL to direct Greenhouse URL: {converted_url}")
+                url = converted_url
+
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
@@ -77,27 +160,93 @@ def fetch_job_text_playwright(url):
 
             page.goto(url, wait_until="networkidle", timeout=30000)
 
+            # Enhanced handling for Ashby and other SPA-based job sites
+            is_ashby = 'ashbyhq.com' in url
+
             # Wait for the JavaScript content to load
             try:
-                # Wait for job content to appear (common selectors for job sites)
-                page.wait_for_selector('h1, [class*="job"], [class*="title"], [id*="job"], main, article', timeout=15000)
+                if is_ashby:
+                    # Ashby-specific enhanced waiting strategy with retry logic
+                    logging.info("Detected Ashby job page, using enhanced loading strategy")
 
-                # Additional wait for dynamic content
-                page.wait_for_timeout(3000)
+                    # Remove tracking parameters that might interfere with loading
+                    if '?utm_source=' in url or '&utm_source=' in url:
+                        logging.info("Cleaning tracking parameters for more reliable loading")
 
-                # Try to wait for specific job content indicators
-                page.wait_for_function(
-                    """() => {
-                        const text = document.body.innerText;
-                        return text.length > 1000 &&
-                               !text.includes('You need to enable JavaScript') &&
-                               (text.includes('About') || text.includes('Role') || text.includes('Responsibilities') || text.includes('Requirements'));
-                    }""",
-                    timeout=10000
-                )
-            except:
+                    max_retries = 2
+                    content_loaded = False
+
+                    for attempt in range(max_retries + 1):
+                        if attempt > 0:
+                            logging.info(f"Ashby loading attempt {attempt + 1}/{max_retries + 1}")
+                            # Refresh the page for retry attempts
+                            page.reload(wait_until="networkidle", timeout=30000)
+
+                        # Wait for React app to mount and content to load
+                        page.wait_for_timeout(6000)  # Increased initial wait
+
+                        # Wait for main content container or job-specific elements
+                        try:
+                            # Try multiple possible selectors that Ashby might use
+                            page.wait_for_selector('div[data-testid*="job"], div[class*="job"], h1, main, [role="main"], div[class*="content"], button:has-text("Apply")', timeout=20000)
+                        except:
+                            logging.info("Standard selectors failed, waiting for any substantial content")
+
+                        # Enhanced content validation with more specific checks
+                        try:
+                            page.wait_for_function(
+                                """() => {
+                                    const text = document.body.innerText;
+                                    const hasSubstantialContent = text.length > 800;
+                                    const noJSError = !text.includes('You need to enable JavaScript') && !text.includes('enable JavaScript');
+                                    const hasAshbyElements = text.includes('Apply for this Job') || text.includes('Employment Type') || text.includes('Compensation');
+                                    const hasJobKeywords = text.toLowerCase().includes('job') ||
+                                                         text.toLowerCase().includes('position') ||
+                                                         text.toLowerCase().includes('role') ||
+                                                         text.toLowerCase().includes('engineer') ||
+                                                         text.toLowerCase().includes('developer') ||
+                                                         text.toLowerCase().includes('manager') ||
+                                                         text.toLowerCase().includes('responsibilities') ||
+                                                         text.toLowerCase().includes('requirements') ||
+                                                         text.toLowerCase().includes('qualifications') ||
+                                                         text.toLowerCase().includes('experience');
+                                    return hasSubstantialContent && noJSError && (hasAshbyElements || hasJobKeywords);
+                                }""",
+                                timeout=30000
+                            )
+                            content_loaded = True
+                            break
+                        except:
+                            if attempt == max_retries:
+                                logging.warning("Final attempt failed, proceeding with whatever content is available")
+                            else:
+                                logging.info("Content validation failed, will retry")
+
+                    # Additional wait to ensure all dynamic content is loaded
+                    page.wait_for_timeout(4000)
+
+                else:
+                    # Standard waiting strategy for other sites
+                    # Wait for job content to appear (common selectors for job sites)
+                    page.wait_for_selector('h1, [class*="job"], [class*="title"], [id*="job"], main, article', timeout=15000)
+
+                    # Additional wait for dynamic content
+                    page.wait_for_timeout(3000)
+
+                    # Try to wait for specific job content indicators
+                    page.wait_for_function(
+                        """() => {
+                            const text = document.body.innerText;
+                            return text.length > 1000 &&
+                                   !text.includes('You need to enable JavaScript') &&
+                                   (text.includes('About') || text.includes('Role') || text.includes('Responsibilities') || text.includes('Requirements'));
+                        }""",
+                        timeout=10000
+                    )
+            except Exception as wait_error:
                 # If specific selectors fail, just wait a bit longer
-                page.wait_for_timeout(5000)
+                logging.info(f"Content detection failed ({wait_error}), using fallback wait")
+                page.wait_for_timeout(8000 if is_ashby else 5000)
 
             content = page.content()
             browser.close()
@@ -105,10 +254,45 @@ def fetch_job_text_playwright(url):
             soup = BeautifulSoup(content, 'html.parser')
             text = soup.get_text(separator='\n', strip=True)
 
-            # Check if we still got the JavaScript error
-            if "You need to enable JavaScript" in text and len(text) < 500:
-                logging.warning("Still getting JavaScript error, content may not have loaded")
+            # Enhanced JavaScript error detection and cleanup
+            js_error_phrases = [
+                "You need to enable JavaScript to run this app.",
+                "You need to enable JavaScript",
+                "enable JavaScript to run this app",
+                "JavaScript is required",
+                "Please enable JavaScript"
+            ]
+
+            has_js_error = any(phrase in text for phrase in js_error_phrases)
+
+            if has_js_error and len(text) < 500:
+                logging.warning("Still getting JavaScript error with minimal content, page may not have loaded")
                 return None, None
+
+            # Clean up residual JavaScript messages for all sites
+            original_length = len(text)
+            for phrase in js_error_phrases:
+                if phrase in text:
+                    text = text.replace(phrase, "").strip()
+
+            # Clean up any resulting multiple newlines
+            while "\n\n\n" in text:
+                text = text.replace("\n\n\n", "\n\n")
+
+            if original_length != len(text):
+                logging.info(f"Cleaned JavaScript error messages, content reduced from {original_length} to {len(text)} characters")
+
+            # Enhanced validation for Ashby pages
+            if is_ashby:
+                if len(text) < 800:
+                    logging.warning("Ashby page has minimal content, may not have loaded properly")
+                    return None, None
+
+                # Additional check for common Ashby page elements
+                ashby_indicators = ['Apply for this Job', 'Employment Type', 'Department', 'Compensation']
+                if not any(indicator in text for indicator in ashby_indicators):
+                    logging.warning("Ashby page missing expected elements, content may be incomplete")
+                    # Don't return None here, as content might still be usable
 
             return text, soup  # Return both text and soup for formatting
     except Exception as e:

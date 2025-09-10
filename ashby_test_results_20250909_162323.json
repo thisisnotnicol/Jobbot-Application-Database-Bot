@@ -1,0 +1,679 @@
+{
+  "url": "https://jobs.ashbyhq.com/meticulous/3197ae3d-bb26-4750-9ed7-b830f640515e",
+  "timestamp": "2025-09-09T16:23:23.949189",
+  "extraction_success": true,
+  "content_length": 3170,
+  "fields_extracted": 10,
+  "sections_found": [],
+  "javascript_cleaned": true,
+  "raw_text_sample": "Software Engineer @ Meticulous\n\nSoftware Engineer\nLocation\nLondon\nEmployment Type\nFull time\nLocation Type\nOn-site\nDepartment\nEngineering\nCompensation\nBase salary \u00a3100K \u2013 \u00a3250K \u2022 Significant equity\nOverview\nApplication\nOur mission is to radically accelerate the pace of software development. Meticulous is profitable and 10x\u2019ing annual recurring revenue every 12 months.\nWe\u2019ve brought together a small team of some of the most talented engineers in the world. This has allowed us to build a technology...",
+  "extracted_fields": {
+    "Position": "Software Engineer",
+    "Company": "Meticulous",
+    "Salary": "\u00a3100K - \u00a3250K",
+    "Commitment": "Full time",
+    "Industry": [
+      "Technology"
+    ],
+    "Location": [
+      "London"
+    ],
+    "Full Description": "Software Engineer @ Meticulous\n\nSoftware Engineer\nLocation\nLondon\nEmployment Type\nFull time\nLocation Type\nOn-site\nDepartment\nEngineering\nCompensation\nBase salary \u00a3100K \u2013 \u00a3250K \u2022 Significant equity\nOverview\nApplication\nOur mission is to radically accelerate the pace of software development. Meticulous is profitable and 10x\u2019ing annual recurring revenue every 12 months.\nWe\u2019ve brought together a small team of some of the most talented engineers in the world. This has allowed us to build a technology that fully autonomously and exhaustively tests frontend codebases.\nSuch a capability has never existed before, and no other company is even close to building such a capability \u2014 it\u2019s built on the back of a range of novel technologies and research (hint: the core itself doesn't use transformers or LLMs, but something more novel).\nAs a result the demand for the product has been immense. In addition to being one of the fastest growing companies, customers like Dropbox, Wiz, Lattice are often paying more for Meticulous than any other vendor or software product - and then spontaneously referring us to other companies.\nWe believe that autonomous and exhaustive testing is the missing piece in unlocking the full potential of code generation, and automating the majority of software development.\nWe are a team of six onsite in London. We believe in building a small but extremely talented team.\nIf this sounds interesting, please apply to this job posting here.\nWhat you may work on:\nBuild a distributed system to concurrently replay thousands of sessions, such that a developer gets a result in seconds.\nIntegrate Meticulous into the inner loop of agentic code generation, to produce a coding agent far beyond anything that exists today - by giving it a feedback loop to understand the exhaustive impact of every change it makes and iterate against; while also allowing it to understand the full runtime behaviour of the code it\u2019s editing and space of data and edge cases it may operate over.\nDerive algorithms to detect sessions that cover differing code paths and edge cases, and ignore sessions that are too similar.\nWhat you get from working here:\nWorld-class compensation, exceeding top technology companies and startups.\nWork with exceptional colleagues to solve novel and exceedingly difficult problems and change the way the world develops software. Work with some of the very best engineers who were previously at Uber, Google, Dropbox, GitHub, Meta and Palantir, including previously leading 100+ engineer organisations at these companies.\nExpand your network - Guillermo Rauch (founder of Vercel), Jason Warner (CTO of GitHub), Calvin French-Owen (founder of Segment), Jared Friedman (YC partner and founder of Scribd), Scott Belsky (CPO of Adobe), Arash Ferdowsi (founder of Dropbox) and many others are all personal investors in Meticulous. We can connect you with anyone in the technology world if there is a commercial reason for doing so.\nCompensation Range: \u00a3100K - \u00a3250K\nApply for this Job\nThis site is protected by reCAPTCHA and the Google\nPrivacy Policy\nand\nTerms of Service\napply.\nPowered by\nAshby\nPrivacy Policy\nSecurity\nVulnerability Disclosure",
+    "HTML_SOUP": null,
+    "Summary": "Meticulous is seeking a Software Engineer to join their London team, focusing on building a distributed system for autonomous testing of frontend codebases, integrating advanced code generation capabilities, and developing algorithms for efficient session management. Candidates should possess strong engineering skills and experience in distributed systems, with a passion for tackling complex problems. The role offers competitive compensation ranging from \u00a3100K to \u00a3250K, significant equity, and the opportunity to collaborate with a talented team and influential industry leaders.",
+    "formatted_description": "\ud83d\udccb Summary:\nMeticulous is seeking a Software Engineer to join their London team, focusing on building a distributed system for autonomous testing of frontend codebases, integrating advanced code generation capabilities, and developing algorithms for efficient session management. Candidates should possess strong engineering skills and experience in distributed systems, with a passion for tackling complex problems. The role offers competitive compensation ranging from \u00a3100K to \u00a3250K, significant equity, and the opportunity to collaborate with a talented team and influential industry leaders.\n",
+    "notion_blocks": [
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "\ud83d\udccb Summary"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Meticulous is seeking a Software Engineer to join their London team, focusing on building a distributed system for autonomous testing of frontend codebases, integrating advanced code generation capabilities, and developing algorithms for efficient session management. Candidates should possess strong engineering skills and experience in distributed systems, with a passion for tackling complex problems. The role offers competitive compensation ranging from \u00a3100K to \u00a3250K, significant equity, and the opportunity to collaborate with a talented team and influential industry leaders."
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "divider",
+        "divider": {}
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Software Engineer @ Meticulous"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Software Engineer"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Location"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "London"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Employment Type"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Full time"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Location Type"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "On-site"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Department"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Engineering"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Compensation"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Base salary \u00a3100K \u2013 \u00a3250K \u2022 Significant equity"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Overview"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Application"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Our mission is to radically accelerate the pace of software development. Meticulous is profitable and 10x\u2019ing annual recurring revenue every 12 months."
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "We\u2019ve brought together a small team of some of the most talented engineers in the world. This has allowed us to build a technology that fully autonomously and exhaustively tests frontend codebases."
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Such a capability has never existed before, and no other company is even close to building such a capability \u2014 it\u2019s built on the back of a range of novel technologies and research (hint: the core itself doesn't use transformers or LLMs, but something more novel)."
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "As a result the demand for the product has been immense. In addition to being one of the fastest growing companies, customers like Dropbox, Wiz, Lattice are often paying more for Meticulous than any other vendor or software product - and then spontaneously referring us to other companies."
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "We believe that autonomous and exhaustive testing is the missing piece in unlocking the full potential of code generation, and automating the majority of software development."
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "We are a team of six onsite in London. We believe in building a small but extremely talented team."
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "If this sounds interesting, please apply to this job posting here."
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "What you may work on"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Build a distributed system to concurrently replay thousands of sessions, such that a developer gets a result in seconds."
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Integrate Meticulous into the inner loop of agentic code generation, to produce a coding agent far beyond anything that exists today - by giving it a feedback loop to understand the exhaustive impact of every change it makes and iterate against; while also allowing it to understand the full runtime behaviour of the code it\u2019s editing and space of data and edge cases it may operate over."
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Derive algorithms to detect sessions that cover differing code paths and edge cases, and ignore sessions that are too similar."
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "What you get from working here"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "World-class compensation, exceeding top technology companies and startups."
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Work with exceptional colleagues to solve novel and exceedingly difficult problems and change the way the world develops software. Work with some of the very best engineers who were previously at Uber, Google, Dropbox, GitHub, Meta and Palantir, including previously leading 100+ engineer organisations at these companies."
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Expand your network - Guillermo Rauch (founder of Vercel), Jason Warner (CTO of GitHub), Calvin French-Owen (founder of Segment), Jared Friedman (YC partner and founder of Scribd), Scott Belsky (CPO of Adobe), Arash Ferdowsi (founder of Dropbox) and many others are all personal investors in Meticulous. We can connect you with anyone in the technology world if there is a commercial reason for doing so."
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Compensation Range: \u00a3100K - \u00a3250K"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Apply for this Job"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "This site is protected by reCAPTCHA and the Google"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Privacy Policy"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "and"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Terms of Service"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "apply."
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Powered by"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Ashby"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Privacy Policy"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Security"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      },
+      {
+        "object": "block",
+        "type": "heading_2",
+        "heading_2": {
+          "rich_text": [
+            {
+              "type": "text",
+              "text": {
+                "content": "Vulnerability Disclosure"
+              }
+            }
+          ],
+          "color": "default"
+        }
+      }
+    ],
+    "key_bullets": []
+  }
+}
